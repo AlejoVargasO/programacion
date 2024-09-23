@@ -1,84 +1,72 @@
-# Vehicle and Motorcycle Detection on Jetson Nano
-This repository contains the necessary code and resources to execute a vehicle and motorcycle detection model on a Jetson Nano. The project uses a trained PHT model to perform real-time inference using the Jetson Nano's processing capabilities, leveraging OpenCV to display the detection results.
+# Detección de Vehículos y Motos para Estacionamiento en Jetson Nano
+Este repositorio contiene el código y los recursos necesarios para ejecutar un modelo de detección de vehículos y motocicletas en un Jetson Nano. El proyecto utiliza un modelo preentrenado en formato PHT para realizar inferencia en tiempo real, aprovechando las capacidades de procesamiento del Jetson Nano y mostrando los resultados de la detección usando OpenCV.
 
-## Overview
-This project focuses on detecting front and back views of vehicles and motorcycles using a deep learning model trained for Jetson Nano. The repository includes:
+## Descripcion
+Este proyecto se centra en la detección de vistas frontales y traseras de vehículos y motocicletas utilizando un modelo de aprendizaje profundo entrenado para Jetson Nano. El repositorio incluye:
 
-Pre-trained models (PHT format) with different numbers of epochs.
-Code for real-time detection using OpenCV (cv2).
-Instructions for converting PHT models to ONNX for optimized inference on Jetson Nano.
-We use the model trained with 14 epochs for inference, as it provides the best balance between performance and accuracy.
+- Modelos preentrenados en formato PHT con diferentes números de épocas.
+- Código para detección en tiempo real utilizando OpenCV (cv2).
+- Uso de las bibliotecas jetson-inference y jetson-utils de NVIDIA para la inferencia optimizada.
+- Instrucciones para convertir los modelos PHT a formato ONNX, optimizando la inferencia en Jetson Nano.
+  
+Utilizamos el modelo entrenado con 14 épocas para la inferencia, ya que proporciona el mejor equilibrio entre rendimiento y precisión.
 
-##Installation
-Clone this repository:
 
-//Copiar código
-$ git clone https://github.com/AlejoVargasO/programacion.git
-$ cd programacion
+## Instalacion
 
-Install the required Python packages:
+    $ git clone https://github.com/AlejoVargasO/programacion.git
+    $ cd programacion
+    $ docker/run.sh
 
-bash
-Copiar código
-pip install -r requirements.txt
-Ensure that you have Docker installed and set up on your Jetson Nano.
+## Conversion de Modelos a ONNX
 
-Usage
-Running the Detection Model
-The code is configured to run the model and display the bounding boxes on a video stream using OpenCV.
+    
+## 3. Uso
 
-The default model used for inference is the one trained with 14 epochs. You can modify the code to use a different model if needed.
+### Ejecución del Modelo de Detección
 
-To run the detection script:
+  1. El código está configurado para ejecutar el modelo y mostrar las cajas delimitadoras en una transmisión de video utilizando OpenCV.
 
-bash
-Copiar código
-python detect.py
-The script will load the ONNX model and start detecting vehicles and motorcycles in the video feed, showing bounding boxes around detected objects.
+  2. El modelo predeterminado utilizado para la inferencia es el entrenado con 14 épocas. Puedes modificar el código para usar otro modelo si lo prefieres.
 
-Model Information
-The repository includes several trained models in PHT format. Each model was trained for a different number of epochs:
+  Para ejecutar el script de detección:
 
-3 epochs: Basic training, low accuracy.
-48 epochs: Higher accuracy but slower performance on Jetson Nano.
-18 epochs: A balance between training time and accuracy.
-14 epochs: The most efficient model, used for real-time inference.
-We recommend using the 14-epoch model for Jetson Nano due to its efficiency.
+    
+### Convertir modelo a formato ONNX para TensorRT
 
-Converting Models to ONNX
-To improve inference speed on Jetson Nano, the PHT models must be converted to ONNX format. This process is handled within a Docker container on Jetson Nano.
+    $   python3 onnx_export.py --model-dir=models/Car_Detection 
 
-Pull the Docker image:
 
-bash
-Copiar código
-docker pull <your-docker-image>
-Run the Docker container:
+### Montar el docker con nuestro modelo ya entrenado
+    *   Creamos una carpeta en el directorio raiz (fuera del docker)
+    *   Copiamos en la carpeta los archivos labels.txt, ssd-mobilenet.onnx y nuestro programa my_detection.py (por ahora este archivo vacío)
+    *   Si es necesario dar permisos a la carpeta usando chmod
+    *   Montamos el docker agregando esta carpeta
+    
+    $ sudo mkdir my_project
+    $ sudo chmod -R a+rwx my_project
+    $ cd jetson-inference
+    $ docker/run.sh --volume ~/my_project:/my_project
 
-bash
-Copiar código
-docker run -it --runtime nvidia <your-docker-image>
-Convert the PHT model to ONNX inside the Docker container:
 
-bash
-Copiar código
-python convert_to_onnx.py --model_path models/model_14_epochs.pth --output_path models/model_14_epochs.onnx
-Running Inference
-After converting the PHT model to ONNX, you can run the inference:
+### Prueba de nuestro código
 
-Execute the ONNX model on Jetson Nano:
+    $ python3 /my_project/Car_Detection.py
+    
 
-bash
-Copiar código
-python run_inference.py --model models/model_14_epochs.onnx
-The script will open a video feed and show real-time detection results, displaying bounding boxes around detected vehicles and motorcycles.
+Algunas instrucciones que usamos en consola
 
-Docker Setup
-Make sure Docker is installed and configured on your Jetson Nano. The Docker setup is essential for handling model conversion and optimizing inference performance.
+    $   docker/run.sh --volume ~/my_project:/my_project
+    $   python3 onnx_export.py --model-dir=models/Car_Detection 
+    $   detectnet --model=models/Car_Detection/ssd-mobilenet.onnx --labels=models/Car_Detection/labels.txt --input-blob=input_0 --output-cvg=scores --output-bbox=boxes /dev/video0
+    $   python3 /my_project/Car_Detection.py
 
-For more details on Docker installation and configuration, visit the NVIDIA Docker documentation.
+## 4. Inferencia de modelo SSD en video (.mp4) / Modificación de threshold usando argparse
 
-Acknowledgments
-Special thanks to the open-source community and NVIDIA for providing tools and libraries to support deep learning on Jetson Nano.
+Modificamos la captura de video para leer un archivo .mp4 y no la cámara web
 
-This README outlines the essential steps and documentation needed to help users understand how to set up and run your vehicle detection model on Jetson Nano. You can modify any specific sections to better fit your project structure.
+    $  camera = cv2.VideoCapture("/my_project/videoprueba.mp4")
+
+Usamos argparse para modificar por parámetro el threshold de detection
+
+    $   python3 /my_project/Car_Detection.py --threshold 0.5
