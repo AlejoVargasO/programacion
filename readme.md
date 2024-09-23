@@ -1,16 +1,7 @@
-Vehicle and Motorcycle Detection on Jetson Nano
+# Vehicle and Motorcycle Detection on Jetson Nano
 This repository contains the necessary code and resources to execute a vehicle and motorcycle detection model on a Jetson Nano. The project uses a trained PHT model to perform real-time inference using the Jetson Nano's processing capabilities, leveraging OpenCV to display the detection results.
 
-Table of Contents
-Overview
-Installation
-Usage
-Model Information
-Converting Models to ONNX
-Running Inference
-Docker Setup
-Acknowledgments
-Overview
+## Overview
 This project focuses on detecting front and back views of vehicles and motorcycles using a deep learning model trained for Jetson Nano. The repository includes:
 
 Pre-trained models (PHT format) with different numbers of epochs.
@@ -18,13 +9,13 @@ Code for real-time detection using OpenCV (cv2).
 Instructions for converting PHT models to ONNX for optimized inference on Jetson Nano.
 We use the model trained with 14 epochs for inference, as it provides the best balance between performance and accuracy.
 
-Installation
+##Installation
 Clone this repository:
 
-bash
-Copiar código
-git clone https://github.com/AlejoVargasO/programacion.git
-cd programacion
+//Copiar código
+$ git clone https://github.com/AlejoVargasO/programacion.git
+$ cd programacion
+
 Install the required Python packages:
 
 bash
